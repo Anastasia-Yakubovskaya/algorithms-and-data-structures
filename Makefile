@@ -1,32 +1,28 @@
 # Компилятор
 CXX = g++
-
 # Флаги компиляции
-CXXFLAGS = -std=c++14 -Wall -Wextra -O2
-
-# Имя исполняемого файла
-TARGET = work1
-
+CXXFLAGS = -std=c++17 -Wall -Wextra -I./src
 # Исходные файлы
-SRCS = main.cpp ASCII_85.cpp
+SRC_DIR = ./src
+TEST_DIR = ./tests
 
-# Объектные файлы
-OBJS = $(SRCS:.cpp=.o)
+# Цели по умолчанию
+all: work1 test
 
-# Правило по умолчанию
-all: $(TARGET)
+# Сборка основной программы
+work1: $(SRC_DIR)/main.cpp $(SRC_DIR)/ASCII_85.cpp
+	$(CXX) $(CXXFLAGS) $^ -o work1
 
-# Сборка исполняемого файла
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
-
-# Правило для компиляции .cpp файлов в .o
-%.o: %.cpp ASCII_85.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+# Сборка тестов
+test: $(TEST_DIR)/test_ascii85.cpp $(SRC_DIR)/ASCII_85.cpp
+	$(CXX) $(CXXFLAGS) $^ -lgtest -lgtest_main -pthread -o test
 
 # Очистка
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f work1 test
 
-# Псевдоцель для предотвращения конфликтов с файлами
-.PHONY: all clean
+# Запуск тестов
+run_tests: test
+	./test
+
+.PHONY: all clean run_tests

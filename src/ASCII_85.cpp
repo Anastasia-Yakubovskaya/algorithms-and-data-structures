@@ -4,7 +4,6 @@
 #include <cmath>    // Для функции pow
 #include <cstring>  // Для функции strchr
 
-// Кодирование данных в ASCII85
 std::string ASCII85::encode(const std::vector<unsigned char>& input) {
     std::ostringstream oss;
     size_t length = input.size();
@@ -14,6 +13,7 @@ std::string ASCII85::encode(const std::vector<unsigned char>& input) {
         unsigned long value = 0;
         int bytesToProcess = 0;
 
+        // Берем 4 байта
         for (int j = 0; j < 4 && i < length; ++j) {
             value = (value << 8) | input[i++];
             bytesToProcess++;
@@ -25,10 +25,12 @@ std::string ASCII85::encode(const std::vector<unsigned char>& input) {
             continue;
         }
 
+        // Если байтов меньше 4, дополняем нулями
         if (bytesToProcess < 4) {
             value <<= 8 * (4 - bytesToProcess);
         }
 
+        // Кодируем 4 байта в 5 символов ASCII85
         for (int j = 4; j >= 0; --j) {
             oss << static_cast<char>((value / static_cast<unsigned long>(std::pow(85, j))) % 85 + 33);
             value %= static_cast<unsigned long>(std::pow(85, j));
@@ -38,7 +40,6 @@ std::string ASCII85::encode(const std::vector<unsigned char>& input) {
     return oss.str();
 }
 
-// Декодирование ASCII85 в бинарные данные
 std::vector<unsigned char> ASCII85::decode(const std::string& input) {
     std::vector<unsigned char> output;
     size_t length = input.size();
@@ -48,6 +49,7 @@ std::vector<unsigned char> ASCII85::decode(const std::string& input) {
         unsigned long value = 0;
         int bytesProcessed = 0;
 
+        // Обрабатываем 5 символов ASCII85
         for (int j = 0; j < 5 && i < length; ++j) {
             char ch = input[i++];
             if (ch == 'z') {
@@ -61,9 +63,10 @@ std::vector<unsigned char> ASCII85::decode(const std::string& input) {
             bytesProcessed++;
         }
 
+        // Если мы обработали данные правильно
         if (bytesProcessed > 0) {
             for (int j = 3; j >= 0; --j) {
-                if (j < bytesProcessed) {
+                if (j < bytesProcessed - 1) {  // Исправлено: добавляем только нужные байты
                     output.push_back(static_cast<unsigned char>((value >> (8 * j)) & 0xFF));
                 }
             }
