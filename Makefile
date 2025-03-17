@@ -21,7 +21,7 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
 
 # Правило для компиляции .cpp файлов в .o
-%.o: %.cpp ascii85.h
+%.o: %.cpp ASCII_85.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Очистка
