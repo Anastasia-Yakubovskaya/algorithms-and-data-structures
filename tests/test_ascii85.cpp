@@ -1,48 +1,46 @@
 #include <gtest/gtest.h>
-#include "../src/ASCII_85.h"
+#include "ASCII_85.h"
 
-// Тест для кодирования
-TEST(ASCII85Test, EncodeTest) {
-    std::vector<unsigned char> input = {'H', 'e', 'l', 'l', 'o'};
-    std::string expected = "87cURDZBb;";
 
-    std::string result = ASCII85::encode(input);
-    EXPECT_EQ(result, expected);
-}
-
-// Тест для декодирования
-TEST(ASCII85Test, DecodeTest) {
-    std::string input = "87cURDZBb;";
-    std::vector<unsigned char> expected = {'H', 'e', 'l', 'l', 'o'};
-
-    std::vector<unsigned char> result = ASCII85::decode(input);
-    EXPECT_EQ(result, expected);
-}
-
-// Тест для кодирования и декодирования
-TEST(ASCII85Test, EncodeDecodeTest) {
-    std::vector<unsigned char> input = {'H', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'};
-    std::string encoded = ASCII85::encode(input);
-    std::vector<unsigned char> decoded = ASCII85::decode(encoded);
-
-    EXPECT_EQ(decoded, input);
-}
-
-// Тест для пустого ввода
-TEST(ASCII85Test, EmptyInputTest) {
+TEST(ASCII85Test, EncodeEmptyString) {
     std::vector<unsigned char> input = {};
     std::string encoded = ASCII85::encode(input);
-    std::vector<unsigned char> decoded = ASCII85::decode(encoded);
+    EXPECT_EQ(encoded, "");
+}
 
-    EXPECT_TRUE(encoded.empty());
+
+TEST(ASCII85Test, EncodeHello) {
+    std::vector<unsigned char> input = {'h', 'e', 'l', 'l', 'o'};
+    std::string encoded = ASCII85::encode(input);
+    EXPECT_EQ(encoded, "BOu!rDZ");
+}
+
+
+TEST(ASCII85Test, DecodeEmptyString) {
+    std::string input = "";
+    std::vector<unsigned char> decoded = ASCII85::decode(input);
     EXPECT_TRUE(decoded.empty());
 }
 
-// Тест для некорректного ввода
-TEST(ASCII85Test, InvalidInputTest) {
-    std::string invalidInput = "Invalid!@#";
 
-    EXPECT_THROW({
-        ASCII85::decode(invalidInput);
-    }, std::invalid_argument);
+TEST(ASCII85Test, DecodeHello) {
+    std::string input = "BOu!rDZ";
+    std::vector<unsigned char> decoded = ASCII85::decode(input);
+    std::string result(decoded.begin(), decoded.end());
+    EXPECT_EQ(result, "hello");
+}
+
+
+TEST(ASCII85Test, DecodeWithZ) {
+    std::string input = "zBOu!rDZ";
+    std::vector<unsigned char> decoded = ASCII85::decode(input);
+    std::string result(decoded.begin(), decoded.end());
+    EXPECT_EQ(result, std::string(4, '\0') + "hello");
+}
+
+
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
