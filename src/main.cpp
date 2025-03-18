@@ -16,7 +16,7 @@ int main() {
     while (true) {
         printMenu();
         std::cin >> choice;
-        std::cin.ignore(); // Игнорируем оставшийся символ новой строки
+        std::cin.ignore(); 
 
         switch (choice) {
             case 1: {
@@ -25,9 +25,7 @@ int main() {
                 std::cout << "Введите строку для кодирования: ";
                 std::getline(std::cin, input);
 
-
                 std::vector<unsigned char> inputData(input.begin(), input.end());
-
 
                 std::string encoded = ASCII85::encode(inputData);
                 std::cout << "Закодированная строка: " << encoded << "\n";
@@ -40,7 +38,6 @@ int main() {
                 std::getline(std::cin, input);
 
                 try {
-
                     std::vector<unsigned char> decodedData = ASCII85::decode(input);
                     std::string decoded(decodedData.begin(), decodedData.end());
                     std::cout << "Декодированная строка: " << decoded << "\n";
@@ -50,7 +47,7 @@ int main() {
                 break;
             }
             case 3: {
-
+                // Выход
                 std::cout << "Выход из программы.\n";
                 return 0;
             }
