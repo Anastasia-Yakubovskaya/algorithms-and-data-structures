@@ -1,43 +1,28 @@
 name: C++ CI
 
-on:  
+on:
   push:
     branches: [master]
-  pull_request:    
+  pull_request:
     branches: [master]
-     
 jobs:  
   build:
     runs-on: ubuntu-latest
     
     steps:    
       - name: Checkout code      
-        uses: actions/checkout@v3 
+        uses: actions/checkout@v2
    
-      - name: Install build tools      
+      - name: Set up GCC      
+        run: sudo apt-get install -y g++
+        
+      - name: Install Google Test      
         run: |
-          sudo apt-get update
-          sudo apt-get install -y g++ make cmake
-          
-      - name: Install and build Google Test      
-        run: |
-          sudo apt-get install -y libgtest-dev
-          cd /usr/src/gtest
-          sudo cmake CMakeLists.txt
-          sudo make
-          sudo cp *.a /usr/lib
+          sudo apt-get install -y libgtest-dev        
+          sudo apt-get install -y cmake 
 
-      - name: Build project      
+      - name: Build with Makefile      
         run: make
-
-      - name: Verify executable exists
-        run: |
-          if [ ! -f "./work1" ]; then
-            echo "::error::Executable 'work1' not found!"
-            echo "Directory contents:"
-            ls -la
-            exit 1
-          fi
       
-      - name: Run program
-        run: ./work1
+      - name: Run tests
+        run: make tests
