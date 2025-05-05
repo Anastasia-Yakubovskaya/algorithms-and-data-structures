@@ -17,32 +17,23 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++ make cmake python3 build-essential
+          sudo apt-get install -y g++ make python3
 
       - name: Build project
+        working-directory: ./Assignment\ 1
         run: |
-
-          export CXX=g++
-          make clean || true  # Игнорируем ошибку, если clean не существует
           make
 
-      - name: Make test script executable
-        run: chmod +x test_ascii85.sh
-
       - name: Run tests
+        working-directory: ./Assignment\ 1
         run: |
+          make test
 
-          if [ ! -f "./test_ascii85.sh" ]; then
-            echo "::error::Test script not found!"
-            exit 1
-          fi
-          
-
-          ./test_ascii85.sh | tee test_output.log
-          
-
-          if ! grep -q "All tests passed successfully!" test_output.log; then
+      - name: Verify test results
+        working-directory: ./Assignment\ 1
+        run: |
+          if ! grep -q "All tests passed successfully!" test/test_output.log; then
             echo "::error::Some tests failed"
-            cat test_output.log
+            cat test/test_output.log
             exit 1
           fi
