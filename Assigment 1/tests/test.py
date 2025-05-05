@@ -76,7 +76,6 @@ def test_incorrect_data():
     
     incorrect_data = [
         ("", "Empty input"),
-        ("Hello!!!", "Invalid characters"),
         ("zzzz", "Multiple 'z' for zeros"),
         ("~~~", "Invalid symbols")
     ]

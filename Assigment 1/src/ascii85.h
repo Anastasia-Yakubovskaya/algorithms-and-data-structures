@@ -3,11 +3,23 @@
 
 #include <vector>
 #include <string>
+#include <utility>
 
 class ASCII85 {
 public:
-    static std::string encode(const std::vector<uint8_t>& input);
-    static std::vector<uint8_t> decode(const std::string& input); 
+
+    enum class Error {
+        OK,                 
+        EMPTY_INPUT,        
+        BAD_Z_USAGE,        
+        MULTIPLE_Z,         
+        INVALID_CHAR,      
+        INCOMPLETE_GROUP    
+    };
+
+    static std::pair<std::vector<unsigned char>, Error> decode(const std::string& s);
+    
+    static std::string encode(const std::vector<unsigned char>& v);
 };
 
 #endif
