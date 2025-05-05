@@ -12,7 +12,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: List files (debug)
+        run: ls -lR
 
       - name: Install dependencies
         run: |
@@ -20,20 +23,25 @@ jobs:
           sudo apt-get install -y g++ make python3
 
       - name: Build project
-        working-directory: ./Assignment\ 1
         run: |
+          cd "Assignment 1" || exit 1
           make
 
       - name: Run tests
-        working-directory: ./Assignment\ 1
         run: |
+          cd "Assignment 1" || exit 1
           make test
 
       - name: Verify test results
-        working-directory: ./Assignment\ 1
         run: |
-          if ! grep -q "All tests passed successfully!" test/test_output.log; then
-            echo "::error::Some tests failed"
-            cat test/test_output.log
+          cd "Assignment 1" || exit 1
+          if [ -f "test/test_output.log" ]; then
+            if ! grep -q "All tests passed successfully!" test/test_output.log; then
+              echo "::error::Some tests failed"
+              cat test/test_output.log
+              exit 1
+            fi
+          else
+            echo "::error::Test log file not found!"
             exit 1
           fi
