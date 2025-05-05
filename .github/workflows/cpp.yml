@@ -24,17 +24,17 @@ jobs:
 
       - name: Build project
         run: |
-          cd "Assignment 1" || exit 1
+          cd "Assigment 1" || exit 1
           make
 
       - name: Run tests
         run: |
-          cd "Assignment 1" || exit 1
+          cd "Assigment 1" || exit 1
           make test
 
       - name: Verify test results
         run: |
-          cd "Assignment 1" || exit 1
+          cd "Assigment 1" || exit 1
           if [ -f "test/test_output.log" ]; then
             if ! grep -q "All tests passed successfully!" test/test_output.log; then
               echo "::error::Some tests failed"
