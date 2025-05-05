@@ -1,29 +1,61 @@
-name: C++ CI
+name: Build and Test Assignments
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
-  build_test:
+  setup:
     runs-on: ubuntu-latest
+    outputs:
+      assignments: ${{ steps.find-assignments.outputs.assignments }}
+    
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y g++ make cmake libgtest-dev python3
-          cd /usr/src/gtest
-          sudo cmake .
-          sudo make
-          sudo cp *.a /usr/lib
+    - uses: actions/checkout@v3
+    
+    - name: Find assignments
+      id: find-assignments
+      run: |
+        ASSIGNMENTS=$(find . -maxdepth 1 -type d -name "Assignment*" | sort | jq -R -s -c 'split("\n")[:-1]')
+        echo "assignments=$ASSIGNMENTS" >> $GITHUB_OUTPUT
+        echo "Found assignments: $ASSIGNMENTS"
 
-      - name: Configure and build
-        run: |
-          cd "Assignment 1"
-          make test
+  build-and-test:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        assignment: ${{fromJson(needs.setup.outputs.assignments)}}
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++ make cmake libgtest-dev python3
+        # Устанавливаем GTest
+        cd /usr/src/googletest
+        sudo cmake .
+        sudo make
+        sudo cp lib/libgtest*.a /usr/lib
+        sudo cp -r googletest/include/gtest /usr/include
 
-      - name: Run tests
-        run: |
-          cd "Assignment 1"
-          ./test_ascii85 --gtest_color=yes
-          [ -f "tests/test_ascii85.sh" ] && (cd tests && chmod +x test_ascii85.sh && ./test_ascii85.sh)
+    - name: Build ${{ matrix.assignment }}
+      run: |
+        cd "${{ matrix.assignment }}"
+        make
+        
+    - name: Run tests in ${{ matrix.assignment }}
+      run: |
+        cd "${{ matrix.assignment }}"
+        make test
+        
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.assignment }}
+        path: ${{ matrix.assignment }}/bin/test_results.xml
