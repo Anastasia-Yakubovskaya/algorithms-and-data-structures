@@ -1,47 +1,29 @@
 name: C++ CI
 
-on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+on: [push, pull_request]
 
 jobs:
-  build_and_test:
+  build_test:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: List files (debug)
-        run: ls -lR
-
+      - uses: actions/checkout@v3
+      
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++ make python3
+          sudo apt-get install -y g++ make cmake libgtest-dev python3
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp *.a /usr/lib
 
-      - name: Build project
+      - name: Configure and build
         run: |
-          cd "Assigment 1" || exit 1
-          make
+          cd "Assignment 1"
+          make test
 
       - name: Run tests
         run: |
-          cd "Assigment 1" || exit 1
-          make test
-
-      - name: Verify test results
-        run: |
-          cd "Assigment 1" || exit 1
-          if [ -f "test/test_output.log" ]; then
-            if ! grep -q "All tests passed successfully!" test/test_output.log; then
-              echo "::error::Some tests failed"
-              cat test/test_output.log
-              exit 1
-            fi
-          else
-            echo "::error::Test log file not found!"
-            exit 1
-          fi
+          cd "Assignment 1"
+          ./test_ascii85 --gtest_color=yes
+          [ -f "tests/test_ascii85.sh" ] && (cd tests && chmod +x test_ascii85.sh && ./test_ascii85.sh)
