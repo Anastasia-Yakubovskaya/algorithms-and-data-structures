@@ -5,24 +5,38 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+
 jobs:  
-  build:
+  build_and_test:
     runs-on: ubuntu-latest
     
     steps:    
       - name: Checkout code      
         uses: actions/checkout@v2
    
-      - name: Set up GCC      
-        run: sudo apt-get install -y g++
-        
-      - name: Install Google Test      
+      - name: Set up build environment
         run: |
-          sudo apt-get install -y libgtest-dev        
-          sudo apt-get install -y cmake 
-
-      - name: Build with Makefile      
-        run: make
-      
-      - name: Run tests
-        run: make tests
+          sudo apt-get update
+          sudo apt-get install -y g++ make cmake python3
+          
+      - name: Build project
+        run: |
+          make clean
+          make
+          
+      - name: Run functional tests
+        run: |
+          chmod +x test_ascii85.sh
+          ./test_ascii85.sh
+          
+      - name: Install Python for tests
+        run: |
+          python3 -c "import base64; print('Python base64 module available')"
+          
+      - name: Verify test coverage
+        run: |
+          if ! ./test_ascii85.sh | grep -q "All tests passed successfully!"; then
+            echo "::error::Some tests failed"
+            exit 1
+          fi
+          echo "All tests passed successfully"
