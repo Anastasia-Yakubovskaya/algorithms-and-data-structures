@@ -6,37 +6,43 @@ on:
   pull_request:
     branches: [master]
 
-jobs:  
+jobs:
   build_and_test:
     runs-on: ubuntu-latest
     
-    steps:    
-      - name: Checkout code      
+    steps:
+      - name: Checkout code
         uses: actions/checkout@v2
-   
-      - name: Set up build environment
+
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++ make cmake python3
-          
+          sudo apt-get install -y g++ make cmake python3 build-essential
+
       - name: Build project
         run: |
-          make clean
+
+          export CXX=g++
+          make clean || true  # Игнорируем ошибку, если clean не существует
           make
-          
-      - name: Run functional tests
+
+      - name: Make test script executable
+        run: chmod +x test_ascii85.sh
+
+      - name: Run tests
         run: |
-          chmod +x test_ascii85.sh
-          ./test_ascii85.sh
-          
-      - name: Install Python for tests
-        run: |
-          python3 -c "import base64; print('Python base64 module available')"
-          
-      - name: Verify test coverage
-        run: |
-          if ! ./test_ascii85.sh | grep -q "All tests passed successfully!"; then
-            echo "::error::Some tests failed"
+
+          if [ ! -f "./test_ascii85.sh" ]; then
+            echo "::error::Test script not found!"
             exit 1
           fi
-          echo "All tests passed successfully"
+          
+
+          ./test_ascii85.sh | tee test_output.log
+          
+
+          if ! grep -q "All tests passed successfully!" test_output.log; then
+            echo "::error::Some tests failed"
+            cat test_output.log
+            exit 1
+          fi
