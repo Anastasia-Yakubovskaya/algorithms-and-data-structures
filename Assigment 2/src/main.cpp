@@ -1,19 +1,14 @@
 #include <iostream>
 #include "gauss.h"
+#include <fstream>
 
 int main() {
-    try {
-        Eigen::MatrixXd A = readsaveCSV("data.csv");
-        std::cout << "Matrix A:\n" << A << std::endl;
+    Eigen::MatrixXd A = readsaveCSV("data.csv");        
+    VectorXd solution = methodGauss(A);
+    std::ifstream result_file("result.csv");
+    std::string result_info;
+    std::getline(result_file, result_info);
         
-        Eigen::VectorXd solution = methodGauss(A);
-        std::cout << "Solution:\n" << solution << std::endl;
-        
-        writeanswerCSV(solution);
-        
-        return 0;
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
-    }
+    return 0;
+
 }
