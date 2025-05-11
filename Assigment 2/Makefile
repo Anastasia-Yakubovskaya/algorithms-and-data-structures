@@ -1,34 +1,34 @@
-# Компилятор
 CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -I./src -I/usr/include/eigen3 -O3 -march=native -fopenmp-simd
+LDFLAGS = -lgtest -lgtest_main -pthread
 
-# Флаги компиляции
-CXXFLAGS = -std=c++17 -Wall -Wextra -I./src -I/usr/include/eigen3
-
-# Пути для исходников
 SRC_DIR = src
 TEST_DIR = tests
 
-# Исходные файлы
 SRCS = $(SRC_DIR)/main.cpp $(SRC_DIR)/gauss.cpp
+TEST_SRCS = $(TEST_DIR)/test_gauss.cpp $(SRC_DIR)/gauss.cpp
 
-# Имена исполняемых файлов
 TARGET = gauss
 TEST_TARGET = test_gauss
 
-# Основные цели
 all: $(TARGET) test
 
-# Сборка основной программы
 $(TARGET): $(SRCS)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
+$(TEST_TARGET): $(TEST_SRCS)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) 
 
-# Запуск программы
+test: $(TEST_TARGET)
+	./$(TEST_TARGET)
+
 run: $(TARGET)
 	./$(TARGET)
 
-# Очистка
 clean:
-	rm -f $(TARGET) $(TEST_TARGET) *.o
+	rm -f $(TARGET) $(TEST_TARGET) *.o result.csv
 
-.PHONY: all clean test run run_py_tests
+memcheck: $(TARGET)
+	valgrind --leak-check=full ./$(TARGET)
+
+.PHONY: all clean test run memcheck

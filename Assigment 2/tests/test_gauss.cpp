@@ -1,43 +1,58 @@
 #include <gtest/gtest.h>
-#include "ASCII_85.h"
+#include "gauss.h"
+#include <fstream>
 
-
-TEST(ASCII85Test, EncodeEmptyString) {
-    std::vector<unsigned char> input = {};
-    std::string encoded = ASCII85::encode(input);
-    EXPECT_EQ(encoded, "");
+TEST(GausMethodTest, Standardmatrix) {
+    MatrixXd A(3,4);
+     A << 2,  1, -1,  8,
+        -3, -1,  2, -11,
+        -2,  1,  2, -3;
+    VectorXd result = methodGauss(A);
+    VectorXd expected(3);
+    expected << 2, 3, -1;
+    for (int i = 0; i < expected.size(); ++i) {
+        ASSERT_NEAR(result(i),expected(i), 1e-10);
+    }
 }
 
 
-TEST(ASCII85Test, EncodeHello) {
-    std::vector<unsigned char> input = {'h', 'e', 'l', 'l', 'o'};
-    std::string encoded = ASCII85::encode(input);
-    EXPECT_EQ(encoded, "BOu!rDZ");
+TEST(GausMethodTest, Infinitenumberofsolutions) {
+    std::remove("result.csv"); 
+    
+    MatrixXd A(2,3);
+     A << 1,  1, 1,
+          2,  2, 2;
+          
+    VectorXd result = methodGauss(A);
+       
+    std::ifstream file("result.csv");
+    std::string content;
+    std::getline(file,content);
+    
+    ASSERT_EQ(content, "Бесконечное количество решений");
 }
 
-
-TEST(ASCII85Test, DecodeEmptyString) {
-    std::string input = "";
-    std::vector<unsigned char> decoded = ASCII85::decode(input);
-    EXPECT_TRUE(decoded.empty());
+TEST(GausMethodTest, nosolutions) {
+    std::remove("result.csv"); 
+    
+    MatrixXd A(2,3);
+    A << 1, 1, 1,
+         1, 1, 2;
+          
+    VectorXd result = methodGauss(A);
+       
+    std::ifstream file("result.csv");
+    std::string content;
+    std::getline(file,content);
+    
+    ASSERT_EQ(content, "Нет решений");
 }
 
-
-TEST(ASCII85Test, DecodeHello) {
-    std::string input = "BOu!rDZ";
-    std::vector<unsigned char> decoded = ASCII85::decode(input);
-    std::string result(decoded.begin(), decoded.end());
-    EXPECT_EQ(result, "hello");
+TEST(GausMethodTest, randomgen) {
+    Eigen::MatrixXd A = randomgenerator();    
+    ASSERT_GT(A.rows(), 0);
+    ASSERT_EQ(A.cols(), A.rows() + 1) ;
 }
-
-
-TEST(ASCII85Test, DecodeWithZ) {
-    std::string input = "zBOu!rDZ";
-    std::vector<unsigned char> decoded = ASCII85::decode(input);
-    std::string result(decoded.begin(), decoded.end());
-    EXPECT_EQ(result, std::string(4, '\0') + "hello");
-}
-
 
 
 int main(int argc, char **argv) {

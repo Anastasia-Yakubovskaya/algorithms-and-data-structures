@@ -1,8 +1,10 @@
 #include <iostream>
 #include "gauss.h"
 #include <fstream>
+#include <Eigen/Core>
 
 int main() {
+    
     Eigen::MatrixXd A = readsaveCSV("data.csv");        
     VectorXd solution = methodGauss(A);
     std::ifstream result_file("result.csv");
