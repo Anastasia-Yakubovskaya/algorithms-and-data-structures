@@ -49,11 +49,44 @@ TEST(GausMethodTest, nosolutions) {
 }
 
 TEST(GausMethodTest, randomgen) {
-    Eigen::MatrixXd A = randomgenerator();    
+    Eigen::MatrixXd A = randomgenerator();
+    
     ASSERT_GT(A.rows(), 0);
-    ASSERT_EQ(A.cols(), A.rows() + 1) ;
-}
+    ASSERT_EQ(A.cols(), A.rows() + 1);
+    
+    std::remove("result.csv");
+    VectorXd gauss_solution = methodGauss(A);
+    
+    std::ifstream file("result.csv");
+    std::string content;
+    std::getline(file, content);
+    
+    if (content == "Единственное решение") {
 
+        MatrixXd A_part = A.leftCols(A.cols()-1);
+        VectorXd b = A.rightCols(1);
+        VectorXd calculated_b = A_part * gauss_solution;
+        
+        for (int i = 0; i < b.size(); ++i) {
+            ASSERT_NEAR(calculated_b(i), b(i), 1e-8);
+        }
+    }
+    else if (content == "Нет решений") {
+        ASSERT_EQ(gauss_solution.size(), 0);
+    }
+    else if (content == "Бесконечное количество решений") {
+        ASSERT_EQ(gauss_solution.size(), 0);
+    }
+    else {
+        MatrixXd A_part = A.leftCols(A.cols()-1);
+        VectorXd b = A.rightCols(1);
+        VectorXd calculated_b = A_part * gauss_solution;
+        
+        for (int i = 0; i < b.size(); ++i) {
+            ASSERT_NEAR(calculated_b(i), b(i), 1e-8) ;
+        }
+    }
+}
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
