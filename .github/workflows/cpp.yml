@@ -16,9 +16,9 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Find assignments
-      id: find-assignments
-      run: |
-        ASSIGNMENTS=$(find . -maxdepth 1 -type d \( -name "Assignment*" -o -name "assignment-*" \) | sort | jq -R -s -c 'split("\n")[:-1]')
+    id: find-assignments
+    run: |
+        ASSIGNMENTS=$(find . -maxdepth 1 -type d -name "assignment_*" | sort | jq -R -s -c 'split("\n")[:-1]')
         echo "assignments=$ASSIGNMENTS" >> $GITHUB_OUTPUT
         echo "Found assignments: $ASSIGNMENTS"
 
