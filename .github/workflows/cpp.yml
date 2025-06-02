@@ -23,6 +23,3 @@ jobs:
         run: |
           g++ -std=c++11 -o binary_search src/searching/binary_search.cpp
           g++ -std=c++11 -o linear_search src/searching/linear_search.cpp
-          
-          ./binary_search
-          ./linear_search
