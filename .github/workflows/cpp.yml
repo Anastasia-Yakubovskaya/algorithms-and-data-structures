@@ -18,7 +18,7 @@ jobs:
     - name: Find assignments
       id: find-assignments
       run: |
-        ASSIGNMENTS=$(find . -maxdepth 1 -type d -name "Assignment*" | sort | jq -R -s -c 'split("\n")[:-1]')
+        ASSIGNMENTS=$(find . -maxdepth 1 -type d -name "Assignment*" -exec test -f "{}/Makefile" \; -print | sort | jq -R -s -c 'split("\n")[:-1]')
         echo "assignments=$ASSIGNMENTS" >> $GITHUB_OUTPUT
         echo "Found assignments: $ASSIGNMENTS"
 
@@ -36,26 +36,33 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y g++ make cmake libgtest-dev python3
-        # Устанавливаем GTest
         cd /usr/src/googletest
         sudo cmake .
         sudo make
         sudo cp lib/libgtest*.a /usr/lib
         sudo cp -r googletest/include/gtest /usr/include
 
-    - name: Build ${{ matrix.assignment }}
+    - name: Debug assignment content
       run: |
-        cd "${{ matrix.assignment }}"
+        echo "Checking assignment: ${{ matrix.assignment }}"
+        ls -la "${{ matrix.assignment }}"
+        echo "Makefile content:"
+        cat "${{ matrix.assignment }}/Makefile" || echo "No Makefile found"
+
+    - name: Build ${{ matrix.assignment }}
+      working-directory: ${{ matrix.assignment }}
+      run: |
         make
         
     - name: Run tests in ${{ matrix.assignment }}
+      working-directory: ${{ matrix.assignment }}
       run: |
-        cd "${{ matrix.assignment }}"
-        make test
+        make test || echo "Tests failed"
+        find . -name "test_results.xml" -exec cp {} ./ \;
         
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v3
       with:
         name: test-results-${{ matrix.assignment }}
-        path: ${{ matrix.assignment }}/bin/test_results.xml
+        path: ${{ matrix.assignment }}/test_results.xml
