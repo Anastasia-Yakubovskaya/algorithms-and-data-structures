@@ -1,6 +1,10 @@
 name: C++ Algorithms CI
 
-on: [master]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build-assignment1:
@@ -14,7 +18,7 @@ jobs:
         sudo apt-get install -y build-essential g++ make libgtest-dev
 
     - name: Build and Test Assignment1
-      working-directory: ${{ github.workspace }}/Assignment 1
+      working-directory: ${{ github.workspace }}/Assignment1
       run: |
         make clean
         make all
@@ -31,9 +35,8 @@ jobs:
         sudo apt-get install -y build-essential g++ make libgtest-dev
 
     - name: Build and Test Assignment2
-      working-directory: ${{ github.workspace }}/Assignment  2
+      working-directory: ${{ github.workspace }}/Assignment2
       run: |
         make clean
         make all
         make test
-
