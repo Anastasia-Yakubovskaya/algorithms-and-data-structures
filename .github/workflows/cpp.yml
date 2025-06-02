@@ -13,54 +13,54 @@ jobs:
       assignments: ${{ steps.find-assignments.outputs.assignments }}
     
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
     
-    - name: Find assignments
-    id: find-assignments
-    run: |
-        ASSIGNMENTS=$(find . -maxdepth 1 -type d -name "assignment_*" | sort | jq -R -s -c 'split("\n")[:-1]')
-        echo "assignments=$ASSIGNMENTS" >> $GITHUB_OUTPUT
-        echo "Found assignments: $ASSIGNMENTS"
+      - name: Find assignments
+        id: find-assignments
+        run: |
+          ASSIGNMENTS=$(find . -maxdepth 1 -type d -name "assignment_*" | sort | jq -R -s -c 'split("\n")[:-1]')
+          echo "assignments=$ASSIGNMENTS" >> $GITHUB_OUTPUT
+          echo "Found assignments: $ASSIGNMENTS"
 
   build-and-test:
     needs: setup
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        assignment: ${{fromJson(needs.setup.outputs.assignments)}}
+        assignment: ${{ fromJson(needs.setup.outputs.assignments) }}
     
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
     
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y g++ make cmake libgtest-dev python3 libeigen3-dev
-        cd /usr/src/googletest
-        sudo cmake .
-        sudo make
-        sudo cp lib/libgtest*.a /usr/lib
-        sudo cp -r googletest/include/gtest /usr/include
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ make cmake libgtest-dev python3 libeigen3-dev
+          cd /usr/src/googletest
+          sudo cmake .
+          sudo make
+          sudo cp lib/libgtest*.a /usr/lib
+          sudo cp -r googletest/include/gtest /usr/include
 
-    - name: Debug assignment structure
-      run: |
-        echo "Building: ${{ matrix.assignment }}"
-        ls -la "${{ matrix.assignment }}"
+      - name: Debug assignment structure
+        run: |
+          echo "Building: ${{ matrix.assignment }}"
+          ls -la "${{ matrix.assignment }}"
 
-    - name: Build ${{ matrix.assignment }}
-      working-directory: ${{ matrix.assignment }}
-      run: |
-        make
+      - name: Build ${{ matrix.assignment }}
+        working-directory: ${{ matrix.assignment }}
+        run: |
+          make
 
-    - name: Run tests in ${{ matrix.assignment }}
-      working-directory: ${{ matrix.assignment }}
-      run: |
-        make test || echo "Tests failed"
-        ./test_gauss --gtest_output="xml:test_results.xml"
+      - name: Run tests in ${{ matrix.assignment }}
+        working-directory: ${{ matrix.assignment }}
+        run: |
+          make test || echo "Tests failed"
+          ./test_gauss --gtest_output="xml:test_results.xml"
 
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results-${{ matrix.assignment }}
-        path: ${{ matrix.assignment }}/test_results.xml
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ matrix.assignment }}
+          path: ${{ matrix.assignment }}/test_results.xml
