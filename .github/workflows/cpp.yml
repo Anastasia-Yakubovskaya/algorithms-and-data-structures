@@ -1,67 +1,28 @@
-name: Build and Test Assignments
+name: C++ CI
 
 on:
   push:
     branches: [master]
   pull_request:
     branches: [master]
-
-jobs:
-  setup:
+jobs:  
+  build:
     runs-on: ubuntu-latest
-    outputs:
-      assignments: ${{ steps.find-assignments.outputs.assignments }}
     
-    steps:
-      - uses: actions/checkout@v3
-    
-      - name: Find assignments
-        id: find-assignments
+    steps:    
+      - name: Checkout code      
+        uses: actions/checkout@v2
+   
+      - name: Set up GCC      
+        run: sudo apt-get install -y g++
+        
+      - name: Install Google Test      
         run: |
-          ASSIGNMENTS=$(find . -maxdepth 1 -type d -name "Assigment *" | sort | sed 's/ /\\ /g' | jq -R -s -c 'split("\n")[:-1]')
-          echo "assignments=$ASSIGNMENTS" >> $GITHUB_OUTPUT
-          echo "Found assignments: $ASSIGNMENTS"
+          sudo apt-get install -y libgtest-dev        
+          sudo apt-get install -y cmake 
 
-  build-and-test:
-    needs: setup
-    if: ${{ fromJson(needs.setup.outputs.assignments) != '[]' }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        assignment: ${{ fromJson(needs.setup.outputs.assignments) }}
-    
-    steps:
-      - uses: actions/checkout@v3
-    
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y g++ make cmake libgtest-dev python3 libeigen3-dev
-          cd /usr/src/googletest
-          sudo cmake .
-          sudo make
-          sudo cp lib/libgtest*.a /usr/lib
-          sudo cp -r googletest/include/gtest /usr/include
-
-      - name: Debug assignment structure
-        run: |
-          echo "Building: ${{ matrix.assignment }}"
-          ls -la "${{ matrix.assignment }}"
-
-      - name: Build ${{ matrix.assignment }}
-        working-directory: "${{ matrix.assignment }}"
-        run: |
-          make
-
-      - name: Run tests in ${{ matrix.assignment }}
-        working-directory: "${{ matrix.assignment }}"
-        run: |
-          make test || echo "Tests failed"
-          ./test_gauss --gtest_output="xml:test_results.xml"
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results-${{ matrix.assignment }}
-          path: "${{ matrix.assignment }}/test_results.xml"
+      - name: Build with Makefile      
+        run: make
+      
+      - name: Run tests
+        run: make tests
