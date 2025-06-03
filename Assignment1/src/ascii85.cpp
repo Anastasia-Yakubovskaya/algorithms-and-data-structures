@@ -1,4 +1,4 @@
-#include "ascii85.h"
+#include "ASCII_85.h"
 #include <cctype>
 
 std::pair<std::vector<unsigned char>, ASCII85::Error> ASCII85::decode(const std::string& s) {
