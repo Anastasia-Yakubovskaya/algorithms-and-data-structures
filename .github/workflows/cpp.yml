@@ -15,11 +15,23 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential g++ make python3 python3-pip libgtest-dev
+          sudo apt-get install -y \
+            build-essential \
+            g++ \
+            make \
+            python3 \
+            python3-pip \
+            libgtest-dev \
+            libeigen3-dev 
           cd /usr/src/googletest
           sudo cmake CMakeLists.txt
           sudo make
           sudo cp lib/libgtest*.a /usr/lib
+
+      - name: Verify Eigen installation
+        run: |
+          echo "Eigen include path: $(pkg-config --cflags eigen3)"
+          [ -f /usr/include/eigen3/Eigen/Dense ] || exit 1
 
       - name: Build and Test Assignment1
         working-directory: Assignment1
