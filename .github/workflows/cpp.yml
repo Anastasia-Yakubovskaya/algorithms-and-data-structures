@@ -10,21 +10,31 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3 
 
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential g++ make cmake libgtest-dev
 
-      - name: Build and test Assignment 1
-        working-directory: "./Assignment 1"
+      - name: List repository contents (debug)
+        run: ls -R
+
+      - name: Build and install GTest
         run: |
-          make
+          cd /usr/src/gtest
+          sudo cmake CMakeLists.txt
+          sudo make
+          sudo cp *.a /usr/lib
+
+      - name: Build and test Assignment1
+        working-directory: "./Assignment1"
+        run: |
+          make          
           ./test_ascii85
 
-      - name: Build and test Assignment 2
-        working-directory: "./Assignment 2"
+      - name: Build and test Assignment2
+        working-directory: "./Assignment2"
         run: |
           make
           ./test_gauss
