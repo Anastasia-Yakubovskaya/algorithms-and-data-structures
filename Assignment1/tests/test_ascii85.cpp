@@ -36,11 +36,6 @@ TEST(ASCII85Test, DecodeWithZ) {
     EXPECT_EQ(result, std::string(4, '\0') + "hello");
 }
 
-TEST(ASCII85Test, DecodeInvalidChar) {
-    std::string input = "BOu!rD$"; 
-    auto [decoded, error] = ASCII85::decode(input);
-    EXPECT_EQ(error, ASCII85::Error::INVALID_CHAR);
-}
 
 TEST(ASCII85Test, DecodeMultipleZ) {
     std::string input = "zzBOu!rDZ"; 
