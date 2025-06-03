@@ -21,14 +21,14 @@ jobs:
         sudo make
         sudo cp lib/libgtest* /usr/lib
         
-    - name: Build and test Assignment1
-      working-directory: Assignment1
+    - name: Build and test Assignment 1
+      working-directory: ./algorithms-and-data-structures/Assignment1
       run: |
         make
         ./run_tests
         
-    - name: Build and test Assignment2
-      working-directory: Assignment2
+    - name: Build and test Assignment 2
+      working-directory: ./algorithms-and-data-structures/Assignment2
       run: |
         make
         ./run_tests
